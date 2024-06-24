@@ -41,7 +41,7 @@ module Sequel
     #   # Eagerly reload all artists for these albums
     #   # SELECT * FROM artists WHERE id IN (...)
     #   albums.first.artists(eager_reload: true)
-    # 
+    #
     # You can also use the :eager option to specify dependent associations
     # to eager load:
     #
@@ -170,6 +170,9 @@ module Sequel
             objects.reject!{|x| x.frozen? || x.associations.include?(name)}
           end
           reflection = self.class.association_reflection(name)
+          if objects.any?{|x| !x.class.association_reflection(name).equal?(reflection)}
+            raise "tactical_eagerloading not functioning on #{self.class} :#{name}"
+          end
           objects.select!{|x| x.class.association_reflection(name).equal?(reflection)}
           objects
         end
