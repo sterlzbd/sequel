@@ -170,10 +170,13 @@ module Sequel
             objects.reject!{|x| x.frozen? || x.associations.include?(name)}
           end
           reflection = self.class.association_reflection(name)
-          if objects.any?{|x| !x.class.association_reflection(name).equal?(reflection)}
-            raise "tactical_eagerloading not functioning on #{self.class} :#{name}"
+          objects.select! do |x|
+            keep = x.class.association_reflection(name).equal?(reflection)
+            if !keep
+              warn "tactical_eagerloading getting skipped on #{x.class} :#{name}"
+            end
+            keep
           end
-          objects.select!{|x| x.class.association_reflection(name).equal?(reflection)}
           objects
         end
       end
